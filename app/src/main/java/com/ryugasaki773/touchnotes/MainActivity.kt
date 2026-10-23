@@ -1,13 +1,13 @@
 package com.ryugasaki773.touchnotes
 
 import android.app.Activity
-import android.os.Build
-import android.os.Bundle
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import android.os.Build
+import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 
@@ -20,12 +20,9 @@ class MainActivity : Activity() {
         window.navigationBarColor = Color.WHITE
 
         val flags = window.decorView.systemUiVisibility
-        window.decorView.systemUiVisibility =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                flags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-            } else {
-                flags
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = flags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             window.decorView.systemUiVisibility =
@@ -52,6 +49,7 @@ class HandwritingView(context: Context) : View(context) {
     init {
         setBackgroundColor(Color.WHITE)
         isFocusable = true
+        isFocusableInTouchMode = true
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -79,16 +77,16 @@ class HandwritingView(context: Context) : View(context) {
             }
 
             MotionEvent.ACTION_MOVE -> {
-                currentPath?.lineTo(x, y)
+                val path = currentPath ?: return true
+                path.lineTo(x, y)
                 invalidate()
                 return true
             }
 
             MotionEvent.ACTION_UP -> {
-                currentPath?.let {
-                    it.lineTo(x, y)
-                    paths.add(it)
-                }
+                val path = currentPath ?: return true
+                path.lineTo(x, y)
+                paths.add(path)
                 currentPath = null
                 parent?.requestDisallowInterceptTouchEvent(false)
                 invalidate()
@@ -102,13 +100,17 @@ class HandwritingView(context: Context) : View(context) {
                 invalidate()
                 return true
             }
+
+            MotionEvent.ACTION_POINTER_DOWN, MotionEvent.ACTION_POINTER_UP -> {
+                // Multi-touch is ignored intentionally to keep drawing state stable.
+                return true
+            }
         }
 
-        return true
+        return super.onTouchEvent(event)
     }
 
     override fun performClick(): Boolean {
-        super.performClick()
-        return true
+        return super.performClick()
     }
 }
