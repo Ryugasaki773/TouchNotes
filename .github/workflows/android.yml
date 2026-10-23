@@ -30,8 +30,8 @@ jobs:
       - name: Install Android SDK packages
         shell: bash
         run: |
-          yes "" | "$ANDROID_SDK_ROOT"/cmdline-tools/latest/bin/sdkmanager --licenses
-          "$ANDROID_SDK_ROOT"/cmdline-tools/latest/bin/sdkmanager \
+          yes "" | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
             "platform-tools" \
             "platforms;android-35" \
             "build-tools;35.0.0"
@@ -47,10 +47,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: TouchNotes-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 14
           name: TouchNotes-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
