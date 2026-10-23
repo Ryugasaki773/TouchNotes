@@ -1,7 +1,7 @@
-
 package com.ryugasaki773.touchnotes
 
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
 import android.content.Context
 import android.graphics.Canvas
@@ -15,11 +15,22 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         window.statusBarColor = Color.WHITE
         window.navigationBarColor = Color.WHITE
+
+        val flags = window.decorView.systemUiVisibility
         window.decorView.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or
-            View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            } else {
+                flags
+            }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            window.decorView.systemUiVisibility =
+                window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        }
 
         setContentView(HandwritingView(this))
     }
@@ -62,11 +73,7 @@ class HandwritingView(context: Context) : View(context) {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 parent?.requestDisallowInterceptTouchEvent(true)
-
-                currentPath = Path().apply {
-                    moveTo(x, y)
-                }
-
+                currentPath = Path().apply { moveTo(x, y) }
                 invalidate()
                 return true
             }
@@ -82,7 +89,6 @@ class HandwritingView(context: Context) : View(context) {
                     it.lineTo(x, y)
                     paths.add(it)
                 }
-
                 currentPath = null
                 parent?.requestDisallowInterceptTouchEvent(false)
                 invalidate()
